@@ -1,0 +1,290 @@
+#---- LIBRERÍAS ----
+library(readxl)
+library(tidyverse)
+library(ggplot2)
+library(ggthemes)
+
+
+#---- IMPORTAR DATOS ----
+datos <- read_excel("DATA/DATOS SPSS.xlsx", 
+                    range = "A1:I241", col_types = c("numeric", 
+                                                     "numeric", "numeric", "numeric", 
+                                                     "numeric", "numeric", "numeric", 
+                                                     "numeric", "numeric"))
+View(datos)
+
+#---- TRATAMIENTO DATOS ----
+nivel <- c("B. Elemental","B. Media","B. Superior", "Bachillerato")
+datos$NIVEL <- factor(datos$NIVEL,
+                         levels = c("1","2","3", "4"),
+                         labels = nivel)
+
+grado <- c("Primero","Segundo","Tercero","Cuarto",
+           "Quinto","Sexto","Séptimo",
+           "Octavo", "Noveno", "Décimo", 
+           "Primero BGU", "Segundo BGU", "Tercero BGU")
+datos$GRADO <- factor(datos$GRADO,
+                          levels = c(1:13),
+                          labels = grado)
+
+tipo.logro <- c("Cognitivo", "Praxitivo")
+datos$`TIPO LOGRO` <- factor(datos$`TIPO LOGRO`,
+                      levels = c(1:2),
+                      labels = tipo.logro)
+
+nivel.logro <- c("Elemental", "Básico", "Avanzado")
+datos$`NIVEL LOGRO` <- factor(datos$`NIVEL LOGRO`,
+                             levels = c(1:3),
+                             labels = nivel.logro)
+
+datos$PREGUNTA <- factor(datos$PREGUNTA)
+
+modalidad <- c("Semipresencial", "Virtual")
+datos$MODALIDAD <- factor(datos$MODALIDAD,
+                              levels = c(1,2),
+                              labels = modalidad)
+#Porcentaje aciertos
+datos <- datos |>
+  mutate(p.ACIERTOS = ACIERTOS / (ACIERTOS + ERRORES + BLANCOS))
+
+
+#---- GRÁFICAS ----
+##---- Nivel y tipo de logro ----
+datos %>% 
+  ggplot(aes(x = p.ACIERTOS, fill = MODALIDAD)) +
+  geom_density(alpha = 0.7) +
+  facet_grid(`NIVEL LOGRO`~`TIPO LOGRO`)+
+  labs(x = "Aciertos",
+       y = "Densidad relativa",
+       title = "Distribución de la cantidad de aciertos",
+       subtitle = "Por nivel y tipo de logro") +
+  theme_pander() +
+  theme(axis.title.x = element_text(size = 25),
+        axis.title.y = element_text(size = 25),
+        plot.title = element_text(size = 30),
+        plot.subtitle = element_text(size = 25, color = "azure4"),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 15),
+        legend.title =  element_text(size = 20),
+        legend.text =  element_text(size = 20),
+        plot.margin = margin(25, 25, 25, 25),
+        legend.position = "bottom",
+        strip.text.x = element_text(size =17, color='white'),
+        strip.text.y = element_text(size =17,color='white'),
+        strip.background=element_rect(fill='azure4')) +
+  scale_fill_manual(values = c("#FBBE46", "#0F539F")) +
+  scale_x_continuous(breaks = c(0, 0.25, 0.50, 0.75, 1), 
+                     labels = c("0", "5", "10", "15", "20"))
+
+##---- Nivel logro y Nivel Educativo ----
+datos %>% 
+  ggplot(aes(x = p.ACIERTOS, fill = MODALIDAD)) +
+  geom_density(alpha = 0.7) +
+  facet_grid(NIVEL~`NIVEL LOGRO`)+
+  labs(x = "Aciertos",
+       y = "Densidad relativa",
+       title = "Distribución de la cantidad de aciertos",
+       subtitle = "Por nivel de logro y nivel educativo") +
+  theme_pander() +
+  theme(axis.title.x = element_text(size = 25),
+        axis.title.y = element_text(size = 25),
+        plot.title = element_text(size = 30),
+        plot.subtitle = element_text(size = 25, color = "azure4"),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 15),
+        legend.title =  element_text(size = 20),
+        legend.text =  element_text(size = 20),
+        plot.margin = margin(25, 25, 25, 25),
+        legend.position = "bottom",
+        strip.text.x = element_text(size =17, color='white'),
+        strip.text.y = element_text(size =17,color='white'),
+        strip.background=element_rect(fill='azure4')) +
+  scale_fill_manual(values = c("#FBBE46", "#0F539F")) +
+  scale_x_continuous(breaks = c(0, 0.25, 0.50, 0.75, 1), 
+                     labels = c("0", "5", "10", "15", "20"))
+
+
+##---- Nivel logro y Grado ----
+
+datos %>% 
+  ggplot(aes(x = p.ACIERTOS, fill = MODALIDAD)) +
+  geom_density(alpha = 0.7) +
+  facet_grid(`NIVEL LOGRO`~GRADO)+
+  labs(x = "Aciertos",
+       y = "Densidad relativa",
+       title = "Distribución de la cantidad de aciertos",
+       subtitle = "Por nivel de logro y grado") +
+  theme_pander() +
+  theme(axis.title.x = element_text(size = 25),
+        axis.title.y = element_text(size = 25),
+        plot.title = element_text(size = 30),
+        plot.subtitle = element_text(size = 25, color = "azure4"),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 15),
+        legend.title =  element_text(size = 20),
+        legend.text =  element_text(size = 20),
+        plot.margin = margin(25, 25, 25, 25),
+        legend.position = "bottom",
+        strip.text.x = element_text(size =17, color='white'),
+        strip.text.y = element_text(size =17,color='white'),
+        strip.background=element_rect(fill='azure4')) +
+  scale_fill_manual(values = c("#FBBE46", "#0F539F")) +
+  scale_x_continuous(breaks = c(0, 0.25, 0.50, 0.75, 1), 
+                     labels = c("0", "5", "10", "15", "20"))
+
+
+###---- Nivel logro y Grado Elemental----
+datos_elemental <- datos %>%
+  filter(GRADO %in% c("Primero", "Segundo", "Tercero", "Cuarto"))
+
+datos_elemental %>% 
+  ggplot(aes(x = p.ACIERTOS, fill = MODALIDAD)) +
+  geom_density(alpha = 0.7) +
+  facet_grid(`NIVEL LOGRO`~GRADO)+
+  labs(x = "Aciertos",
+       y = "Densidad relativa",
+       title = "Distribución de la cantidad de aciertos",
+       subtitle = "Por nivel de logro y grado") +
+  theme_pander() +
+  theme(axis.title.x = element_text(size = 25),
+        axis.title.y = element_text(size = 25),
+        plot.title = element_text(size = 30),
+        plot.subtitle = element_text(size = 25, color = "azure4"),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        legend.title =  element_text(size = 20),
+        legend.text =  element_text(size = 20),
+        plot.margin = margin(25, 25, 25, 25),
+        legend.position = "bottom",
+        strip.text.x = element_text(size =17, color='white'),
+        strip.text.y = element_text(size =17,color='white'),
+        strip.background=element_rect(fill='azure4')) +
+  scale_fill_manual(values = c("#FBBE46", "#0F539F")) +
+  scale_x_continuous(breaks = c(0, 0.25, 0.50, 0.75, 1), 
+                     labels = c("0", "5", "10", "15", "20"))
+
+###---- Nivel logro y Grado Media----
+datos_media <- datos %>%
+  filter(GRADO %in% c("Quinto","Sexto","Séptimo"))
+
+datos_media %>% 
+  ggplot(aes(x = p.ACIERTOS, fill = MODALIDAD)) +
+  geom_density(alpha = 0.7) +
+  facet_grid(`NIVEL LOGRO`~GRADO)+
+  labs(x = "Aciertos",
+       y = "Densidad relativa",
+       title = "Distribución de la cantidad de aciertos",
+       subtitle = "Por nivel de logro y grado") +
+  theme_pander() +
+  theme(axis.title.x = element_text(size = 25),
+        axis.title.y = element_text(size = 25),
+        plot.title = element_text(size = 30),
+        plot.subtitle = element_text(size = 25, color = "azure4"),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        legend.title =  element_text(size = 20),
+        legend.text =  element_text(size = 20),
+        plot.margin = margin(25, 25, 25, 25),
+        legend.position = "bottom",
+        strip.text.x = element_text(size =17, color='white'),
+        strip.text.y = element_text(size =17,color='white'),
+        strip.background=element_rect(fill='azure4')) +
+  scale_fill_manual(values = c("#FBBE46", "#0F539F")) +
+  scale_x_continuous(breaks = c(0, 0.25, 0.50, 0.75, 1), 
+                     labels = c("0", "5", "10", "15", "20"))
+
+
+###---- Nivel logro y Grado Superior----
+datos_superior <- datos %>%
+  filter(GRADO %in% c("Octavo", "Noveno", "Décimo"))
+
+datos_superior %>% 
+  ggplot(aes(x = p.ACIERTOS, fill = MODALIDAD)) +
+  geom_density(alpha = 0.7) +
+  facet_grid(`NIVEL LOGRO`~GRADO)+
+  labs(x = "Aciertos",
+       y = "Densidad relativa",
+       title = "Distribución de la cantidad de aciertos",
+       subtitle = "Por nivel de logro y grado") +
+  theme_pander() +
+  theme(axis.title.x = element_text(size = 25),
+        axis.title.y = element_text(size = 25),
+        plot.title = element_text(size = 30),
+        plot.subtitle = element_text(size = 25, color = "azure4"),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        legend.title =  element_text(size = 20),
+        legend.text =  element_text(size = 20),
+        plot.margin = margin(25, 25, 25, 25),
+        legend.position = "bottom",
+        strip.text.x = element_text(size =17, color='white'),
+        strip.text.y = element_text(size =17,color='white'),
+        strip.background=element_rect(fill='azure4')) +
+  scale_fill_manual(values = c("#FBBE46", "#0F539F")) +
+  scale_x_continuous(breaks = c(0, 0.25, 0.50, 0.75, 1), 
+                     labels = c("0", "5", "10", "15", "20"))
+
+
+###---- Nivel logro y Grado BGU----
+datos_BGU <- datos %>%
+  filter(GRADO %in% c("Primero BGU", "Segundo BGU", "Tercero BGU"))
+
+datos_BGU %>% 
+  ggplot(aes(x = GRADO, y = p.ACIERTOS, color = MODALIDAD)) +
+  geom_segment(aes(xend = GRADO, yend = 0), size = 1.5) +
+  facet_grid(`NIVEL LOGRO`~ .)+
+  labs(x = "Grado",
+       y = "Aciertos",
+       title = "Distribución de la cantidad de aciertos",
+       subtitle = "Por nivel de logro y grado") +
+  theme_pander() +
+  theme(axis.title.x = element_text(size = 25),
+        axis.title.y = element_text(size = 25),
+        plot.title = element_text(size = 30),
+        plot.subtitle = element_text(size = 25, color = "azure4"),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        legend.title =  element_text(size = 20),
+        legend.text =  element_text(size = 20),
+        plot.margin = margin(25, 25, 25, 25),
+        legend.position = "bottom",
+        strip.text.x = element_text(size =17, color='white'),
+        strip.text.y = element_text(size =17,color='white'),
+        strip.background=element_rect(fill='azure4')) +
+  scale_fill_manual(values = c("#FBBE46", "#0F539F")) +
+  coord_flip()
+
+
+#---- PRUEBA DE NORMALIDAD ----
+##---- Kolmorov-Smirnov ----
+# Para verificar si hay o no distribución normal
+
+ks <- ks.test(x = datos |> 
+                filter(MODALIDAD == "Semipresencial") |> 
+                pull (ACIERTOS),
+              y = datos |> 
+                filter(MODALIDAD == "Virtual") |> 
+                pull (ACIERTOS)
+              )
+ks
+
+##---- Test de Levene ----
+
+# Para verificar si hay o no diferencias entre las varianzas de dos grupos
+library(car)
+lv <- leveneTest(y = datos$ACIERTOS,
+                 group = datos$MODALIDAD,
+                 center = "median")
+lv
+
+
+#---- COMPARACION DE MEDIAS ----
+##---- Prueba T MUESTRAS INDEPENDIENTES SI VARIANZAS DIFERENTES
+t.test(datos |> 
+         filter(MODALIDAD == "Semipresencial") |> 
+         pull (ACIERTOS), 
+       datos |> 
+         filter(MODALIDAD == "Virtual") |> 
+         pull (ACIERTOS),
+       alternative = "two.sided",
+       var.equal = TRUE, conf.level = 0.95)
