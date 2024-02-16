@@ -16,33 +16,33 @@ View(datos)
 #---- TRATAMIENTO DATOS ----
 nivel <- c("B. Elemental","B. Media","B. Superior", "Bachillerato")
 datos$NIVEL <- factor(datos$NIVEL,
-                         levels = c("1","2","3", "4"),
-                         labels = nivel)
+                      levels = c("1","2","3", "4"),
+                      labels = nivel)
 
 grado <- c("Primero","Segundo","Tercero","Cuarto",
            "Quinto","Sexto","Séptimo",
            "Octavo", "Noveno", "Décimo", 
            "Primero BGU", "Segundo BGU", "Tercero BGU")
 datos$GRADO <- factor(datos$GRADO,
-                          levels = c(1:13),
-                          labels = grado)
+                      levels = c(1:13),
+                      labels = grado)
 
 tipo.logro <- c("Cognitivo", "Praxitivo")
 datos$`TIPO LOGRO` <- factor(datos$`TIPO LOGRO`,
-                      levels = c(1:2),
-                      labels = tipo.logro)
+                             levels = c(1:2),
+                             labels = tipo.logro)
 
 nivel.logro <- c("Elemental", "Básico", "Avanzado")
 datos$`NIVEL LOGRO` <- factor(datos$`NIVEL LOGRO`,
-                             levels = c(1:3),
-                             labels = nivel.logro)
+                              levels = c(1:3),
+                              labels = nivel.logro)
 
 datos$PREGUNTA <- factor(datos$PREGUNTA)
 
 modalidad <- c("Semipresencial", "Virtual")
 datos$MODALIDAD <- factor(datos$MODALIDAD,
-                              levels = c(1,2),
-                              labels = modalidad)
+                          levels = c(1,2),
+                          labels = modalidad)
 #Porcentaje aciertos
 datos <- datos |>
   mutate(p.ACIERTOS = ACIERTOS / (ACIERTOS + ERRORES + BLANCOS))
@@ -230,11 +230,11 @@ datos_BGU <- datos %>%
   filter(GRADO %in% c("Primero BGU", "Segundo BGU", "Tercero BGU"))
 
 datos_BGU %>% 
-  ggplot(aes(x = GRADO, y = p.ACIERTOS, color = MODALIDAD)) +
-  geom_segment(aes(xend = GRADO, yend = 0), size = 1.5) +
-  facet_grid(`NIVEL LOGRO`~ .)+
-  labs(x = "Grado",
-       y = "Aciertos",
+  ggplot(aes(x = p.ACIERTOS, fill = MODALIDAD)) +
+  geom_density(alpha = 0.7) +
+  facet_grid(`NIVEL LOGRO`~GRADO)+
+  labs(x = "Aciertos",
+       y = "Densidad relativa",
        title = "Distribución de la cantidad de aciertos",
        subtitle = "Por nivel de logro y grado") +
   theme_pander() +
@@ -252,7 +252,35 @@ datos_BGU %>%
         strip.text.y = element_text(size =17,color='white'),
         strip.background=element_rect(fill='azure4')) +
   scale_fill_manual(values = c("#FBBE46", "#0F539F")) +
-  coord_flip()
+  scale_x_continuous(breaks = c(0, 0.25, 0.50, 0.75, 1), 
+                     labels = c("0", "5", "10", "15", "20"))
+
+###---- Nivel logro y Nivel----
+datos %>% 
+  ggplot(aes(x = p.ACIERTOS, fill = MODALIDAD)) +
+  geom_density(alpha = 0.7) +
+  facet_grid(`NIVEL LOGRO`~ .)+
+  labs(x = "Aciertos",
+       y = "Densidad relativa",
+       title = "Distribución de la cantidad de aciertos",
+       subtitle = "Por nivel de logro") +
+  theme_pander() +
+  theme(axis.title.x = element_text(size = 25),
+        axis.title.y = element_text(size = 25),
+        plot.title = element_text(size = 30),
+        plot.subtitle = element_text(size = 25, color = "azure4"),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        legend.title =  element_text(size = 20),
+        legend.text =  element_text(size = 20),
+        plot.margin = margin(25, 25, 25, 25),
+        legend.position = "bottom",
+        strip.text.x = element_text(size =17, color='white'),
+        strip.text.y = element_text(size =17,color='white'),
+        strip.background=element_rect(fill='azure4')) +
+  scale_fill_manual(values = c("#FBBE46", "#0F539F")) +
+  scale_x_continuous(breaks = c(0, 0.25, 0.50, 0.75, 1), 
+                     labels = c("0", "5", "10", "15", "20"))
 
 
 #---- PRUEBA DE NORMALIDAD ----
@@ -265,7 +293,8 @@ ks <- ks.test(x = datos |>
               y = datos |> 
                 filter(MODALIDAD == "Virtual") |> 
                 pull (ACIERTOS)
-              )
+)
+
 ks
 
 ##---- Test de Levene ----
